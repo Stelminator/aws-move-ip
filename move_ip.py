@@ -29,7 +29,7 @@ if __name__ == '__main__':
     ])['Addresses']
 
     if current_addresses and current_addresses[0]['PublicIp'] == public_ip:
-        print "already have that address"
+        print("already have that address")
         sys.exit(0)
     elif current_addresses:
         raise Exception('instance already has different EIP')
@@ -50,28 +50,28 @@ if __name__ == '__main__':
             desired = 'standard'
             # if not already associated, great
             if 'AssociationId' in address:
-                print "disassociating", address['AssociationId']
+                print("disassociating", address['AssociationId'])
                 client.disassociate_address(
                     AssociationId=address['AssociationId'],
                 )
-            print "restoring", public_ip, "to classic"
+            print("restoring", public_ip, "to classic")
             response = client.restore_address_to_classic(
                 PublicIp=public_ip
             )
         else:
             desired = 'vpc'
             # not really a way to check, this call should work anyway
-            print "disassociating", public_ip
+            print("disassociating", public_ip)
             client.disassociate_address(
                 PublicIp=public_ip
             )
-            print "moving", public_ip, "to vpc"
+            print("moving", public_ip, "to vpc")
             response = client.move_address_to_vpc(
                 PublicIp=public_ip
             )
 
         for x in range(5):
-            print "checking on address migration", x
+            print("checking on address migration", x)
             address = client.describe_addresses(
                 PublicIps=[public_ip])['Addresses'][0]
             if address['PublicIp'] != public_ip:
@@ -82,20 +82,20 @@ if __name__ == '__main__':
                 break
             time.sleep(6)
         else:
-            print "timed out moving address '%s' to: '%s' Domain" % (public_ip, desired)
+            print("timed out moving address '%s' to: '%s' Domain" % (public_ip, desired))
             sys.exit(1)
 
     if is_vpc_instance:
-        print "associating", address['AllocationId'], "to", instance_id
+        print("associating", address['AllocationId'], "to", instance_id)
         client.associate_address(
             AllocationId=address['AllocationId'],
             InstanceId=instance_id,
             AllowReassociation=True,
         )
     else:
-        print "associating", public_ip, "to", instance_id
+        print("associating", public_ip, "to", instance_id)
         client.associate_address(
             InstanceId=instance_id,
             PublicIp=public_ip,
         )
-    print "Completed"
+    print("Completed")
