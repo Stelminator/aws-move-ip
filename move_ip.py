@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     if is_vpc_instance:
         for interface in ec2_metadata.network_interfaces.values():
-            if interface.public_ipv4:
+            if interface.public_ipv4s:
                 print("associating", address['AllocationId'], interface.interface_id, "to", instance_id)
                 client.associate_address(
                     AllocationId=address['AllocationId'],
