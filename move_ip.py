@@ -86,12 +86,18 @@ if __name__ == '__main__':
             sys.exit(1)
 
     if is_vpc_instance:
-        print("associating", address['AllocationId'], "to", instance_id)
-        client.associate_address(
-            AllocationId=address['AllocationId'],
-            InstanceId=instance_id,
-            AllowReassociation=True,
-        )
+        for interface in ec2_metadata.network_interfaces:
+            if interface.public_ipv4:
+                print("associating", address['AllocationId'], interface.interface_id, "to", instance_id)
+                client.associate_address(
+                    AllocationId=address['AllocationId'],
+                    NetworkInterfaceId=interface.interface_id,
+                    AllowReassociation=True,
+                )
+                break
+        else:
+            print("failed to find network interface")
+            sys.exit(1)
     else:
         print("associating", public_ip, "to", instance_id)
         client.associate_address(
